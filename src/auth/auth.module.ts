@@ -17,5 +17,6 @@ import { EmergencyUnitModule } from 'src/emergency-unit/emergency-unit.module';
   ],
   controllers: [AuthController],
   providers: [AuthService, JwtAuthService],
+  exports: [JwtAuthService], // <-- export JwtAuthService for use in other modules
 })
 export class AuthModule {}
