@@ -18,6 +18,6 @@ export class PredictionEntity {
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;
 
-  @ManyToOne(() => User, { eager: false, nullable: true })
+  @ManyToOne(() => User, { eager: false, nullable: false })
   user: User;
 }
