@@ -8,6 +8,7 @@ import { ConfigModule } from '@nestjs/config';
 import { EmergencyUnitModule } from './emergency-unit/emergency-unit.module';
 import { ReportModule } from './report/report.module';
 import { InstructionModule } from './instruction/instruction.module';
+import { PredictionModule } from './prediction/prediction.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { InstructionModule } from './instruction/instruction.module';
     EmergencyUnitModule,
     ReportModule,
     InstructionModule,
+    PredictionModule,
   ],
   controllers: [AppController],
   providers: [AppService],

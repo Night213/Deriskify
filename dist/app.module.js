@@ -17,6 +17,7 @@ const config_1 = require("@nestjs/config");
 const emergency_unit_module_1 = require("./emergency-unit/emergency-unit.module");
 const report_module_1 = require("./report/report.module");
 const instruction_module_1 = require("./instruction/instruction.module");
+const prediction_module_1 = require("./prediction/prediction.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -32,6 +33,7 @@ exports.AppModule = AppModule = __decorate([
             emergency_unit_module_1.EmergencyUnitModule,
             report_module_1.ReportModule,
             instruction_module_1.InstructionModule,
+            prediction_module_1.PredictionModule,
         ],
         controllers: [app_controller_1.AppController],
         providers: [app_service_1.AppService],
