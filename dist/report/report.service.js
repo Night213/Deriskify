@@ -44,6 +44,10 @@ let ReportService = class ReportService {
             images: imageUrls,
             user: { id: userId },
             emergencyUnit: { id: emergencyUnit.id },
+            coordinates: {
+                type: 'Point',
+                coordinates: createReportDto.coordinates,
+            },
         };
         const report = this.reportRepository.create(reportData);
         const savedReport = await this.reportRepository.save(report);

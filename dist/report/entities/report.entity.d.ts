@@ -7,7 +7,11 @@ export declare class Report {
     _id: UUID;
     description: string;
     images: string[];
-    status: ReportPriority;
+    coordinates: {
+        type: 'Point';
+        coordinates: [number, number];
+    };
+    priority: ReportPriority;
     user: User;
     emergencyUnit: EmergencyUnit;
     createdAt: Date;

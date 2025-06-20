@@ -28,12 +28,15 @@ export class Report {
   @Column({ type: 'simple-array' })
   images: string[];
 
+  @Column('geometry', { spatialFeatureType: 'Point', srid: 4326 })
+  coordinates: { type: 'Point'; coordinates: [number, number] };
+
   @Column({
     type: 'enum',
     enum: ReportPriority,
     default: ReportPriority.MEDIUM,
   })
-  status: ReportPriority;
+  priority: ReportPriority;
 
   /* -----START-OF-RELATIONS -----*/
 

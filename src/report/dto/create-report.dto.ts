@@ -4,7 +4,12 @@ import {
   IsOptional,
   IsArray,
   IsUUID,
+  IsNumber,
+  ArrayMinSize,
+  ArrayMaxSize,
 } from 'class-validator';
+
+import { Transform } from 'class-transformer';
 
 export class CreateReportDto {
   @IsNotEmpty()
@@ -19,4 +24,11 @@ export class CreateReportDto {
   @IsArray()
   @IsString({ each: true })
   images?: string[];
+
+  @IsArray()
+  @IsNumber({}, { each: true })
+  @ArrayMinSize(2)
+  @ArrayMaxSize(2)
+  @Transform(({ value }: { value: number[] }) => value.map(Number))
+  coordinates: [number, number];
 }

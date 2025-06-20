@@ -1,24 +1,12 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
-import { ExpressAdapter } from '@nestjs/platform-express';
-import * as express from 'express';
 
-const server = express();
-
-async function createNestServer(expressInstance) {
-  const app = await NestFactory.create(
-    AppModule,
-    new ExpressAdapter(expressInstance),
-  );
+async function bootstrap() {
+  const app = await NestFactory.create(AppModule);
 
   app.enableCors({
-    origin: [
-      'http://localhost:5173',
-      'https://deriskify-frontend.vercel.app', // will be updated to the production URL
-    ],
-    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
-    allowedHeaders: 'Content-Type, Authorization',
+    origin: 'http://localhost:5173',
     credentials: true,
   });
 
@@ -29,9 +17,6 @@ async function createNestServer(expressInstance) {
     }),
   );
 
-  await app.init();
+  await app.listen(process.env.PORT ?? 8080);
 }
-
-void createNestServer(server);
-
-module.exports = server;
+bootstrap();

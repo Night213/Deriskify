@@ -17,7 +17,7 @@ export class RetrieveReportDto {
   images: string[];
 
   @Expose()
-  status: ReportPriority;
+  priority: ReportPriority;
 
   @Expose()
   @Type(() => RetrieveUserDto)
@@ -26,6 +26,16 @@ export class RetrieveReportDto {
   @Expose()
   @Type(() => EmergencyUnitListDto)
   emergencyUnit: EmergencyUnitListDto;
+
+  @Expose()
+  @Transform(
+    ({
+      obj,
+    }: {
+      obj: { coordinates: { type: 'Point'; coordinates: [number, number] } };
+    }) => [obj.coordinates.coordinates[0], obj.coordinates.coordinates[1]],
+  )
+  coordinates: [number, number];
 
   @Expose()
   createdAt: Date;

@@ -11,10 +11,12 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CreateReportDto = void 0;
 const class_validator_1 = require("class-validator");
+const class_transformer_1 = require("class-transformer");
 class CreateReportDto {
     description;
     emergencyUnitId;
     images;
+    coordinates;
 }
 exports.CreateReportDto = CreateReportDto;
 __decorate([
@@ -33,4 +35,12 @@ __decorate([
     (0, class_validator_1.IsString)({ each: true }),
     __metadata("design:type", Array)
 ], CreateReportDto.prototype, "images", void 0);
+__decorate([
+    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.IsNumber)({}, { each: true }),
+    (0, class_validator_1.ArrayMinSize)(2),
+    (0, class_validator_1.ArrayMaxSize)(2),
+    (0, class_transformer_1.Transform)(({ value }) => value.map(Number)),
+    __metadata("design:type", Array)
+], CreateReportDto.prototype, "coordinates", void 0);
 //# sourceMappingURL=create-report.dto.js.map

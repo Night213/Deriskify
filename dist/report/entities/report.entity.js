@@ -19,7 +19,8 @@ let Report = class Report {
     _id;
     description;
     images;
-    status;
+    coordinates;
+    priority;
     user;
     emergencyUnit;
     createdAt;
@@ -44,13 +45,17 @@ __decorate([
     __metadata("design:type", Array)
 ], Report.prototype, "images", void 0);
 __decorate([
+    (0, typeorm_1.Column)('geometry', { spatialFeatureType: 'Point', srid: 4326 }),
+    __metadata("design:type", Object)
+], Report.prototype, "coordinates", void 0);
+__decorate([
     (0, typeorm_1.Column)({
         type: 'enum',
         enum: report_enums_1.ReportPriority,
         default: report_enums_1.ReportPriority.MEDIUM,
     }),
     __metadata("design:type", String)
-], Report.prototype, "status", void 0);
+], Report.prototype, "priority", void 0);
 __decorate([
     (0, typeorm_1.ManyToOne)(() => user_entity_1.User, { eager: true }),
     (0, typeorm_1.JoinColumn)(),

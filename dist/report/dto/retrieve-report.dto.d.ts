@@ -6,9 +6,10 @@ export declare class RetrieveReportDto {
     id: UUID;
     description: string;
     images: string[];
-    status: ReportPriority;
+    priority: ReportPriority;
     user: RetrieveUserDto;
     emergencyUnit: EmergencyUnitListDto;
+    coordinates: [number, number];
     createdAt: Date;
     updatedAt: Date;
 }

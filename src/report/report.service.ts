@@ -45,6 +45,10 @@ export class ReportService {
       images: imageUrls,
       user: { id: userId },
       emergencyUnit: { id: emergencyUnit.id },
+      coordinates: {
+        type: 'Point' as const,
+        coordinates: createReportDto.coordinates,
+      },
     };
 
     const report = this.reportRepository.create(reportData);

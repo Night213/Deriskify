@@ -18,9 +18,10 @@ class RetrieveReportDto {
     id;
     description;
     images;
-    status;
+    priority;
     user;
     emergencyUnit;
+    coordinates;
     createdAt;
     updatedAt;
 }
@@ -41,7 +42,7 @@ __decorate([
 __decorate([
     (0, class_transformer_1.Expose)(),
     __metadata("design:type", String)
-], RetrieveReportDto.prototype, "status", void 0);
+], RetrieveReportDto.prototype, "priority", void 0);
 __decorate([
     (0, class_transformer_1.Expose)(),
     (0, class_transformer_1.Type)(() => retrieve_user_dto_1.RetrieveUserDto),
@@ -52,6 +53,11 @@ __decorate([
     (0, class_transformer_1.Type)(() => emergency_unit_list_dto_1.EmergencyUnitListDto),
     __metadata("design:type", emergency_unit_list_dto_1.EmergencyUnitListDto)
 ], RetrieveReportDto.prototype, "emergencyUnit", void 0);
+__decorate([
+    (0, class_transformer_1.Expose)(),
+    (0, class_transformer_1.Transform)(({ obj, }) => [obj.coordinates.coordinates[0], obj.coordinates.coordinates[1]]),
+    __metadata("design:type", Array)
+], RetrieveReportDto.prototype, "coordinates", void 0);
 __decorate([
     (0, class_transformer_1.Expose)(),
     __metadata("design:type", Date)
