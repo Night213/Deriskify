@@ -4,6 +4,8 @@ import {
   Length,
   IsStrongPassword,
   IsMobilePhone,
+  IsOptional,
+  IsArray,
 } from 'class-validator';
 import { IsEgyptianNationalId } from 'src/lib/validators/is-egyptian-national-id.validator';
 
@@ -50,4 +52,18 @@ export class CreateUserDto {
     minSymbols: 1,
   })
   password: string;
+
+  @IsOptional()
+  weight?: number;
+
+  @IsOptional()
+  height?: number;
+
+  @IsOptional()
+  @IsArray()
+  chronicDiseases?: string[];
+
+  @IsOptional()
+  @IsArray()
+  emergencyContacts?: string[];
 }

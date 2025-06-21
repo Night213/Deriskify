@@ -22,4 +22,20 @@ export class RetrieveUserDto {
   @Expose()
   @Transform(({ obj }: { obj: User }) => obj.profile?.birthDate || null)
   birthDate: Date | null;
+
+  @Expose()
+  @Transform(({ obj }: { obj: User }) => obj.profile?.weight || null)
+  weight: number | null;
+
+  @Expose()
+  @Transform(({ obj }: { obj: User }) => obj.profile?.height || null)
+  height: number | null;
+
+  @Expose()
+  @Transform(({ obj }: { obj: User }) => obj.profile?.chronicDiseases || [])
+  chronicDiseases: string[];
+
+  @Expose()
+  @Transform(({ obj }: { obj: User }) => obj.profile?.emergencyContacts || [])
+  emergencyContacts: string[];
 }

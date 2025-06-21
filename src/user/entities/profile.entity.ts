@@ -32,6 +32,12 @@ export class UserProfile {
   @Column({ type: 'varchar', length: 50 })
   city: string;
 
+  @Column({ type: 'simple-array', nullable: true })
+  chronicDiseases: string[];
+
+  @Column({ type: 'simple-array', nullable: true })
+  emergencyContacts: string[];
+
   /* -----START-OF-RELATIONS -----*/
 
   @OneToOne(() => User, (u) => u.profile, {

@@ -136,10 +136,36 @@ export class UserService {
   }
 
   async update(id: number, updateUserDto: UpdateUserDto) {
-    const user = await this.userRepository.findOneBy({ id });
+    const user = await this.userRepository.findOne({
+      where: { id },
+      relations: ['profile'],
+    });
     if (!user) throw new NotFoundException(`User with id ${id} not found`);
-    const updatedUser = this.userRepository.merge(user, updateUserDto);
-    return this.userRepository.save(updatedUser);
+
+    // Update user fields
+    this.userRepository.merge(user, updateUserDto);
+
+    // Update profile fields if present
+    if (user.profile) {
+      const profileUpdates: Partial<UserProfile> = {};
+      if (updateUserDto.weight !== undefined)
+        profileUpdates.weight = updateUserDto.weight;
+      if (updateUserDto.height !== undefined)
+        profileUpdates.height = updateUserDto.height;
+      if (updateUserDto.chronicDiseases !== undefined)
+        profileUpdates.chronicDiseases = updateUserDto.chronicDiseases;
+      if (updateUserDto.emergencyContacts !== undefined)
+        profileUpdates.emergencyContacts = updateUserDto.emergencyContacts;
+      if (updateUserDto.address !== undefined)
+        profileUpdates.address = updateUserDto.address;
+      if (updateUserDto.city !== undefined)
+        profileUpdates.city = updateUserDto.city;
+      await this.userProfileRepository.update(user.profile.id, profileUpdates);
+    }
+
+    await this.userRepository.save(user);
+    // Reload user with updated profile
+    return this.userRepository.findOne({ where: { id }, relations: ['profile'] });
   }
   remove(nationalId: string) {
     console.log(`This action removes a #${nationalId} user`);
