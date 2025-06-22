@@ -22,6 +22,9 @@ const retrieve_report_dto_1 = require("./dto/retrieve-report.dto");
 const jwt_auth_guard_1 = require("../auth/guards/jwt-auth.guard");
 const emu_auth_guard_1 = require("../auth/guards/emu-auth.guard");
 const class_transformer_1 = require("class-transformer");
+const report_enums_1 = require("../shared/enums/report.enums");
+const emergency_unit_stats_dto_1 = require("./dto/emergency-unit-stats.dto");
+const statistics_response_dto_1 = require("./dto/statistics-response.dto");
 let ReportController = class ReportController {
     reportService;
     constructor(reportService) {
@@ -48,17 +51,30 @@ let ReportController = class ReportController {
             excludeExtraneousValues: true,
         });
     }
-    async findMyEmergencyUnitReports(req) {
-        const reports = await this.reportService.findByEmergencyUnit(req.emu.id);
-        console.log((0, class_transformer_1.plainToInstance)(retrieve_report_dto_1.RetrieveReportDto, reports, {
-            excludeExtraneousValues: true,
-        }));
-        return (0, class_transformer_1.plainToInstance)(retrieve_report_dto_1.RetrieveReportDto, reports, {
+    async findMyEmergencyUnitReports(req, status = report_enums_1.ReportStatus.ACTIVE) {
+        if (!Object.values(report_enums_1.ReportStatus).includes(status)) {
+            throw new Error('Invalid report status');
+        }
+        const emergencyUnitId = req.emu.id;
+        const reports = await this.reportService.findByEmergencyUnit(emergencyUnitId, status);
+        const stats = await this.reportService.getEmergencyUnitStats(emergencyUnitId);
+        return {
+            reports: (0, class_transformer_1.plainToInstance)(retrieve_report_dto_1.RetrieveReportDto, reports, {
+                excludeExtraneousValues: true,
+            }),
+            stats: (0, class_transformer_1.plainToInstance)(emergency_unit_stats_dto_1.EmergencyUnitStatsDto, stats, {
+                excludeExtraneousValues: true,
+            }),
+        };
+    }
+    async findEmergencyUnitReportById(id) {
+        const report = await this.reportService.findByUuid(id);
+        return (0, class_transformer_1.plainToInstance)(retrieve_report_dto_1.RetrieveReportDto, report, {
             excludeExtraneousValues: true,
         });
     }
     async findOne(id) {
-        const report = await this.reportService.findOne(id);
+        const report = await this.reportService.findByUuid(id);
         return (0, class_transformer_1.plainToInstance)(retrieve_report_dto_1.RetrieveReportDto, report, {
             excludeExtraneousValues: true,
         });
@@ -72,6 +88,17 @@ let ReportController = class ReportController {
     async remove(id) {
         await this.reportService.remove(id);
         return { message: 'Report deleted successfully' };
+    }
+    async acceptReport(id) {
+        const acceptedReport = await this.reportService.acceptReport(id);
+        return (0, class_transformer_1.plainToInstance)(retrieve_report_dto_1.RetrieveReportDto, acceptedReport, {
+            excludeExtraneousValues: true,
+        });
+    }
+    async getStatistics(req) {
+        const emergencyUnitId = req.emu.id;
+        const weeklyStats = await this.reportService.getWeeklyReportStats(emergencyUnitId);
+        return (0, class_transformer_1.plainToInstance)(statistics_response_dto_1.StatisticsResponseDto, { weeklyStats }, { excludeExtraneousValues: true });
     }
 };
 exports.ReportController = ReportController;
@@ -115,16 +142,25 @@ __decorate([
     (0, common_1.Get)('emergency-unit'),
     (0, common_1.UseGuards)(emu_auth_guard_1.EMUAuthGuard),
     __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Query)('status')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
+    __metadata("design:paramtypes", [Object, String]),
     __metadata("design:returntype", Promise)
 ], ReportController.prototype, "findMyEmergencyUnitReports", null);
 __decorate([
+    (0, common_1.Get)('emergency-unit/:id'),
+    (0, common_1.UseGuards)(emu_auth_guard_1.EMUAuthGuard),
+    __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], ReportController.prototype, "findEmergencyUnitReportById", null);
+__decorate([
     (0, common_1.Get)('user/:id'),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
-    __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
+    __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Number]),
+    __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], ReportController.prototype, "findOne", null);
 __decorate([
@@ -139,11 +175,27 @@ __decorate([
 __decorate([
     (0, common_1.Delete)('user/:id'),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
-    __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
+    __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Number]),
+    __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], ReportController.prototype, "remove", null);
+__decorate([
+    (0, common_1.Patch)(':id/accept'),
+    (0, common_1.UseGuards)(emu_auth_guard_1.EMUAuthGuard),
+    __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], ReportController.prototype, "acceptReport", null);
+__decorate([
+    (0, common_1.Get)('statistics'),
+    (0, common_1.UseGuards)(emu_auth_guard_1.EMUAuthGuard),
+    __param(0, (0, common_1.Req)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], ReportController.prototype, "getStatistics", null);
 exports.ReportController = ReportController = __decorate([
     (0, common_1.Controller)('reports'),
     __metadata("design:paramtypes", [report_service_1.ReportService])

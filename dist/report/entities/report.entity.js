@@ -21,6 +21,7 @@ let Report = class Report {
     images;
     coordinates;
     priority;
+    status;
     user;
     emergencyUnit;
     createdAt;
@@ -56,6 +57,10 @@ __decorate([
     }),
     __metadata("design:type", String)
 ], Report.prototype, "priority", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'enum', enum: report_enums_1.ReportStatus, default: report_enums_1.ReportStatus.ACTIVE }),
+    __metadata("design:type", String)
+], Report.prototype, "status", void 0);
 __decorate([
     (0, typeorm_1.ManyToOne)(() => user_entity_1.User, { eager: true }),
     (0, typeorm_1.JoinColumn)(),

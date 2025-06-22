@@ -22,6 +22,7 @@ class RetrieveReportDto {
     user;
     emergencyUnit;
     coordinates;
+    status;
     createdAt;
     updatedAt;
 }
@@ -55,9 +56,15 @@ __decorate([
 ], RetrieveReportDto.prototype, "emergencyUnit", void 0);
 __decorate([
     (0, class_transformer_1.Expose)(),
-    (0, class_transformer_1.Transform)(({ obj, }) => [obj.coordinates.coordinates[0], obj.coordinates.coordinates[1]]),
+    (0, class_transformer_1.Transform)(({ obj, }) => {
+        return obj.coordinates.coordinates || [-1, -1];
+    }),
     __metadata("design:type", Array)
 ], RetrieveReportDto.prototype, "coordinates", void 0);
+__decorate([
+    (0, class_transformer_1.Expose)(),
+    __metadata("design:type", String)
+], RetrieveReportDto.prototype, "status", void 0);
 __decorate([
     (0, class_transformer_1.Expose)(),
     __metadata("design:type", Date)

@@ -1,6 +1,6 @@
 import { Expose, Transform, Type } from 'class-transformer';
 
-import { ReportPriority } from 'src/shared/enums/report.enums';
+import { ReportPriority, ReportStatus } from 'src/shared/enums/report.enums';
 import { EmergencyUnitListDto } from 'src/emergency-unit/dto/emergency-unit-list.dto';
 import { RetrieveUserDto } from 'src/user/dto/retrieve-user.dto';
 import { UUID } from 'node:crypto';
@@ -33,9 +33,14 @@ export class RetrieveReportDto {
       obj,
     }: {
       obj: { coordinates: { type: 'Point'; coordinates: [number, number] } };
-    }) => [obj.coordinates.coordinates[0], obj.coordinates.coordinates[1]],
+    }) => {
+      return obj.coordinates.coordinates || [-1, -1];
+    },
   )
   coordinates: [number, number];
+
+  @Expose()
+  status: ReportStatus;
 
   @Expose()
   createdAt: Date;

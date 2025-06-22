@@ -19,6 +19,7 @@ const typeorm_2 = require("typeorm");
 const report_entity_1 = require("./entities/report.entity");
 const s3_service_1 = require("../lib/services/s3.service");
 const emergency_unit_entity_1 = require("../emergency-unit/entities/emergency-unit.entity");
+const report_enums_1 = require("../shared/enums/report.enums");
 let ReportService = class ReportService {
     reportRepository;
     emergencyUnitRepository;
@@ -86,9 +87,9 @@ let ReportService = class ReportService {
         });
         return reports;
     }
-    async findByEmergencyUnit(emergencyUnitId) {
+    async findByEmergencyUnit(emergencyUnitId, status) {
         const reports = await this.reportRepository.find({
-            where: { emergencyUnit: { id: emergencyUnitId } },
+            where: { emergencyUnit: { id: emergencyUnitId }, status },
             relations: ['user', 'emergencyUnit'],
         });
         return reports;
@@ -106,7 +107,7 @@ let ReportService = class ReportService {
         return updatedReport;
     }
     async remove(id) {
-        const report = await this.findOne(id);
+        const report = await this.findByUuid(id);
         if (report.images && report.images.length > 0) {
             for (const imageUrl of report.images) {
                 try {
@@ -129,6 +130,157 @@ let ReportService = class ReportService {
             signedUrls.push(signedUrl);
         }
         return signedUrls;
+    }
+    async acceptReport(id) {
+        try {
+            const report = await this.reportRepository.findOne({
+                where: { _id: id },
+                relations: ['user', 'emergencyUnit'],
+            });
+            if (!report) {
+                throw new common_1.NotFoundException(`Report with ID ${id} not found`);
+            }
+            if (report.status !== report_enums_1.ReportStatus.ACTIVE) {
+                throw new common_1.BadRequestException(`Report with ID ${id} is not in an active state`);
+            }
+            report.status = report_enums_1.ReportStatus.ACCEPTED;
+            const updatedReport = await this.reportRepository.save(report);
+            return updatedReport;
+        }
+        catch (error) {
+            console.error(`Error accepting report with ID ${id}:`, error);
+            throw new common_1.NotFoundException(`Report with ID ${id} not found`);
+        }
+    }
+    async getWeeklyReportStats(emergencyUnitId) {
+        try {
+            const query = this.reportRepository
+                .createQueryBuilder('report')
+                .select('report.createdAt')
+                .addSelect('report.id');
+            if (emergencyUnitId) {
+                query.leftJoin('report.emergencyUnit', 'emergencyUnit');
+                query.where('emergencyUnit.id = :emergencyUnitId', {
+                    emergencyUnitId,
+                });
+            }
+            const reports = await query.getMany();
+            const dayMap = {
+                0: 'Sun',
+                1: 'Mon',
+                2: 'Tue',
+                3: 'Wed',
+                4: 'Thu',
+                5: 'Fri',
+                6: 'Sat',
+            };
+            const dayCounts = {
+                Mon: 0,
+                Tue: 0,
+                Wed: 0,
+                Thu: 0,
+                Fri: 0,
+                Sat: 0,
+                Sun: 0,
+            };
+            reports.forEach((report) => {
+                const date = new Date(report.createdAt);
+                const dayIndex = date.getDay();
+                const dayOfWeek = dayMap[dayIndex];
+                if (dayOfWeek && dayOfWeek in dayCounts) {
+                    dayCounts[dayOfWeek] += 1;
+                }
+            });
+            const daysOfWeek = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+            const formattedResults = daysOfWeek.map((day) => ({
+                day,
+                count: dayCounts[day],
+            }));
+            return formattedResults;
+        }
+        catch (error) {
+            console.error('Error fetching weekly report stats:', error);
+            return [
+                { day: 'Mon', count: 0 },
+                { day: 'Tue', count: 0 },
+                { day: 'Wed', count: 0 },
+                { day: 'Thu', count: 0 },
+                { day: 'Fri', count: 0 },
+                { day: 'Sat', count: 0 },
+                { day: 'Sun', count: 0 },
+            ];
+        }
+    }
+    async getEmergencyUnitStats(emergencyUnitId) {
+        try {
+            const now = new Date();
+            const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+            const totalReportersQuery = this.reportRepository
+                .createQueryBuilder('report')
+                .leftJoin('report.user', 'user')
+                .leftJoin('report.emergencyUnit', 'emergencyUnit')
+                .where('emergencyUnit.id = :emergencyUnitId', { emergencyUnitId })
+                .select('COUNT(DISTINCT user.id)', 'count');
+            const totalReportersRaw = (await totalReportersQuery.getRawOne());
+            const totalReporters = parseInt(totalReportersRaw?.count ?? '0', 10);
+            const newReportersQuery = this.reportRepository
+                .createQueryBuilder('report')
+                .leftJoin('report.user', 'user')
+                .leftJoin('report.emergencyUnit', 'emergencyUnit')
+                .where('emergencyUnit.id = :emergencyUnitId', { emergencyUnitId })
+                .andWhere('report.createdAt >= :firstDayOfMonth', { firstDayOfMonth })
+                .select('COUNT(DISTINCT user.id)', 'count');
+            const newReportersRaw = (await newReportersQuery.getRawOne());
+            const newReporters = parseInt(newReportersRaw?.count ?? '0', 10);
+            const reporterChangePercentage = totalReporters > 0
+                ? Math.round((newReporters / totalReporters) * 100)
+                : 0;
+            const completedReportsQuery = this.reportRepository
+                .createQueryBuilder('report')
+                .leftJoin('report.emergencyUnit', 'emergencyUnit')
+                .where('emergencyUnit.id = :emergencyUnitId', { emergencyUnitId })
+                .andWhere('report.status = :status', { status: report_enums_1.ReportStatus.ACCEPTED })
+                .select('COUNT(report.id)', 'count');
+            const completedReportsRaw = (await completedReportsQuery.getRawOne());
+            const completedReports = parseInt(completedReportsRaw?.count ?? '0', 10);
+            const newCompletedReportsQuery = this.reportRepository
+                .createQueryBuilder('report')
+                .leftJoin('report.emergencyUnit', 'emergencyUnit')
+                .where('emergencyUnit.id = :emergencyUnitId', { emergencyUnitId })
+                .andWhere('report.status = :status', { status: report_enums_1.ReportStatus.ACCEPTED })
+                .andWhere('report.updatedAt >= :firstDayOfMonth', { firstDayOfMonth })
+                .select('COUNT(report.id)', 'count');
+            const newCompletedReportsRaw = (await newCompletedReportsQuery.getRawOne());
+            const newCompletedReports = parseInt(newCompletedReportsRaw?.count ?? '0', 10);
+            const completedReportsChangePercentage = completedReports > 0
+                ? Math.round((newCompletedReports / completedReports) * 100) * -1
+                : 0;
+            const activeReportsQuery = this.reportRepository
+                .createQueryBuilder('report')
+                .leftJoin('report.emergencyUnit', 'emergencyUnit')
+                .where('emergencyUnit.id = :emergencyUnitId', { emergencyUnitId })
+                .andWhere('report.status = :status', { status: report_enums_1.ReportStatus.ACTIVE })
+                .select('COUNT(report.id)', 'count');
+            const activeReportsRaw = (await activeReportsQuery.getRawOne());
+            const activeReports = parseInt(activeReportsRaw?.count ?? '0', 10);
+            return {
+                totalReporters,
+                reporterChangePercentage,
+                completedReports,
+                completedReportsChangePercentage,
+                activeReports,
+            };
+        }
+        catch (error) {
+            console.error('Error fetching emergency unit stats:', error);
+            return {
+                totalReporters: 0,
+                reporterChangePercentage: 0,
+                completedReports: 0,
+                completedReportsChangePercentage: 0,
+                activeReports: 0,
+            };
+        }
     }
 };
 exports.ReportService = ReportService;

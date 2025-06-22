@@ -1,4 +1,4 @@
-import { ReportPriority } from 'src/shared/enums/report.enums';
+import { ReportPriority, ReportStatus } from 'src/shared/enums/report.enums';
 import { EmergencyUnitListDto } from 'src/emergency-unit/dto/emergency-unit-list.dto';
 import { RetrieveUserDto } from 'src/user/dto/retrieve-user.dto';
 import { UUID } from 'node:crypto';
@@ -10,6 +10,7 @@ export declare class RetrieveReportDto {
     user: RetrieveUserDto;
     emergencyUnit: EmergencyUnitListDto;
     coordinates: [number, number];
+    status: ReportStatus;
     createdAt: Date;
     updatedAt: Date;
 }

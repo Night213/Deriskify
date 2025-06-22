@@ -3,3 +3,7 @@ export declare enum ReportPriority {
     MEDIUM = "medium",
     HIGH = "high"
 }
+export declare enum ReportStatus {
+    ACTIVE = "ACTIVE",
+    ACCEPTED = "ACCEPTED"
+}

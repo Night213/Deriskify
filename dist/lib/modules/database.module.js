@@ -20,11 +20,14 @@ exports.DatabaseModule = DatabaseModule = __decorate([
             config_1.ConfigModule.forRoot({ isGlobal: true }),
             typeorm_1.TypeOrmModule.forRootAsync({
                 imports: [config_1.ConfigModule],
-                useFactory: (configService) => ({
-                    ...data_source_1.dataSourceOptions,
-                    autoLoadEntities: true,
-                    synchronize: configService.get('DB_SYNC', false),
-                }),
+                useFactory: (configService) => {
+                    const synchronize = configService.get('DB_SYNC', 'false') === 'true';
+                    return {
+                        ...data_source_1.dataSourceOptions,
+                        autoLoadEntities: true,
+                        synchronize,
+                    };
+                },
                 inject: [config_1.ConfigService],
             }),
         ],

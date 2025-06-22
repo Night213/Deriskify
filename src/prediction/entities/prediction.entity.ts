@@ -1,6 +1,12 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, ManyToOne } from 'typeorm';
-import { User } from 'src/user/entities/user.entity';
-import { EmergencyUnit } from 'src/emergency-unit/entities/emergency-unit.entity';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  CreateDateColumn,
+  ManyToOne,
+} from 'typeorm';
+import { User } from '../../user/entities/user.entity';
+import { EmergencyUnit } from '../../emergency-unit/entities/emergency-unit.entity';
 
 @Entity('predictions')
 export class PredictionEntity {

@@ -11,7 +11,7 @@ import {
 } from 'typeorm';
 import { User } from '../../user/entities/user.entity';
 import { EmergencyUnit } from '../../emergency-unit/entities/emergency-unit.entity';
-import { ReportPriority } from '../../shared/enums/report.enums';
+import { ReportPriority, ReportStatus } from '../../shared/enums/report.enums';
 
 @Entity()
 export class Report {
@@ -37,6 +37,9 @@ export class Report {
     default: ReportPriority.MEDIUM,
   })
   priority: ReportPriority;
+
+  @Column({ type: 'enum', enum: ReportStatus, default: ReportStatus.ACTIVE })
+  status: ReportStatus;
 
   /* -----START-OF-RELATIONS -----*/
 
