@@ -20,6 +20,8 @@ let UserProfile = class UserProfile {
     height;
     address;
     city;
+    chronicDiseases;
+    emergencyContacts;
     user;
     createdAt;
     updatedAt;
@@ -53,6 +55,14 @@ __decorate([
     (0, typeorm_1.Column)({ type: 'varchar', length: 50 }),
     __metadata("design:type", String)
 ], UserProfile.prototype, "city", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'simple-array', nullable: true }),
+    __metadata("design:type", Array)
+], UserProfile.prototype, "chronicDiseases", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'simple-array', nullable: true }),
+    __metadata("design:type", Array)
+], UserProfile.prototype, "emergencyContacts", void 0);
 __decorate([
     (0, typeorm_1.OneToOne)(() => user_entity_1.User, (u) => u.profile, {
         cascade: true,

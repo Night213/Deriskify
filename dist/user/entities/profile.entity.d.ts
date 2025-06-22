@@ -7,6 +7,8 @@ export declare class UserProfile {
     height: number;
     address: string;
     city: string;
+    chronicDiseases: string[];
+    emergencyContacts: string[];
     user: User;
     createdAt: Date;
     updatedAt: Date;

@@ -19,6 +19,10 @@ class CreateUserDto {
     address;
     city;
     password;
+    weight;
+    height;
+    chronicDiseases;
+    emergencyContacts;
 }
 exports.CreateUserDto = CreateUserDto;
 __decorate([
@@ -66,4 +70,22 @@ __decorate([
     }),
     __metadata("design:type", String)
 ], CreateUserDto.prototype, "password", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Number)
+], CreateUserDto.prototype, "weight", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Number)
+], CreateUserDto.prototype, "height", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsArray)(),
+    __metadata("design:type", Array)
+], CreateUserDto.prototype, "chronicDiseases", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsArray)(),
+    __metadata("design:type", Array)
+], CreateUserDto.prototype, "emergencyContacts", void 0);
 //# sourceMappingURL=create-user.dto.js.map

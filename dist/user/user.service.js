@@ -109,11 +109,31 @@ let UserService = class UserService {
         return user;
     }
     async update(id, updateUserDto) {
-        const user = await this.userRepository.findOneBy({ id });
+        const user = await this.userRepository.findOne({
+            where: { id },
+            relations: ['profile'],
+        });
         if (!user)
             throw new common_1.NotFoundException(`User with id ${id} not found`);
-        const updatedUser = this.userRepository.merge(user, updateUserDto);
-        return this.userRepository.save(updatedUser);
+        this.userRepository.merge(user, updateUserDto);
+        if (user.profile) {
+            const profileUpdates = {};
+            if (updateUserDto.weight !== undefined)
+                profileUpdates.weight = updateUserDto.weight;
+            if (updateUserDto.height !== undefined)
+                profileUpdates.height = updateUserDto.height;
+            if (updateUserDto.chronicDiseases !== undefined)
+                profileUpdates.chronicDiseases = updateUserDto.chronicDiseases;
+            if (updateUserDto.emergencyContacts !== undefined)
+                profileUpdates.emergencyContacts = updateUserDto.emergencyContacts;
+            if (updateUserDto.address !== undefined)
+                profileUpdates.address = updateUserDto.address;
+            if (updateUserDto.city !== undefined)
+                profileUpdates.city = updateUserDto.city;
+            await this.userProfileRepository.update(user.profile.id, profileUpdates);
+        }
+        await this.userRepository.save(user);
+        return this.userRepository.findOne({ where: { id }, relations: ['profile'] });
     }
     remove(nationalId) {
         console.log(`This action removes a #${nationalId} user`);

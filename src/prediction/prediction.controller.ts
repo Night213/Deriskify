@@ -14,6 +14,7 @@ import { PredictionService } from './prediction.service';
 import { CreatePredictionDto } from './dto/create-prediction.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { AuthenticatedRequest } from '../shared/types/auth.types';
+import { PredictionResponseDto } from './dto/prediction-response.dto';
 
 @Controller('prediction')
 export class PredictionController {
@@ -26,24 +27,61 @@ export class PredictionController {
     @UploadedFile() file: Express.Multer.File,
     @Body() body: CreatePredictionDto,
     @Req() req: AuthenticatedRequest,
-  ) {
+  ): Promise<PredictionResponseDto> {
     if (!file) {
       throw new BadRequestException('Image file is required');
     }
     if (!body.category) {
       throw new BadRequestException('Category is required');
     }
-    return this.predictionService.predictAndSave(file, body.category, req.user);
+    const prediction = await this.predictionService.predictAndSave(file, body.category, req.user);
+    return {
+      predictedPriority: prediction.predictedPriority,
+      imageUrl: prediction.imageUrl,
+    };
   }
 
   @Get('my-predictions')
   @UseGuards(JwtAuthGuard)
   async getMyPredictions(@Req() req: AuthenticatedRequest) {
-    return this.predictionService.findByUser(req.user.id);
+    const predictions = await this.predictionService.findByUser(req.user.id);
+    return predictions.map(prediction => ({
+      id: prediction.id,
+      category: prediction.category,
+      predictedPriority: prediction.predictedPriority,
+      imageName: prediction.imageName,
+      imageUrl: prediction.imageUrl,
+      createdAt: prediction.createdAt,
+      user: prediction.user,
+    }));
   }
 
   @Get()
-  async getAllPredictions() {
-    return this.predictionService.findAll();
+  @UseGuards(JwtAuthGuard)
+  async getAllPredictions(@Req() req: AuthenticatedRequest) {
+    // If the logged-in user is an emergency unit, filter by their predictions only
+    if (req.user && req.user.userType === 'EMERGENCY_UNIT') {
+      const predictions = await this.predictionService.findByEmergencyUnit(req.user.id);
+      return predictions.map(prediction => ({
+        id: prediction.id,
+        category: prediction.category,
+        predictedPriority: prediction.predictedPriority,
+        imageName: prediction.imageName,
+        imageUrl: prediction.imageUrl,
+        createdAt: prediction.createdAt,
+        user: prediction.user,
+      }));
+    }
+    // Otherwise, return all predictions
+    const predictions = await this.predictionService.findAll();
+    return predictions.map(prediction => ({
+      id: prediction.id,
+      category: prediction.category,
+      predictedPriority: prediction.predictedPriority,
+      imageName: prediction.imageName,
+      imageUrl: prediction.imageUrl,
+      createdAt: prediction.createdAt,
+      user: prediction.user,
+    }));
   }
 }

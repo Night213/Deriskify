@@ -5,4 +5,8 @@ export declare class CreateUserDto {
     address: string;
     city: string;
     password: string;
+    weight?: number;
+    height?: number;
+    chronicDiseases?: string[];
+    emergencyContacts?: string[];
 }

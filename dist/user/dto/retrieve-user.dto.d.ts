@@ -5,4 +5,8 @@ export declare class RetrieveUserDto {
     address: string | null;
     city: string | null;
     birthDate: Date | null;
+    weight: number | null;
+    height: number | null;
+    chronicDiseases: string[];
+    emergencyContacts: string[];
 }

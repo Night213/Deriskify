@@ -18,6 +18,10 @@ class RetrieveUserDto {
     address;
     city;
     birthDate;
+    weight;
+    height;
+    chronicDiseases;
+    emergencyContacts;
 }
 exports.RetrieveUserDto = RetrieveUserDto;
 __decorate([
@@ -47,4 +51,24 @@ __decorate([
     (0, class_transformer_1.Transform)(({ obj }) => obj.profile?.birthDate || null),
     __metadata("design:type", Object)
 ], RetrieveUserDto.prototype, "birthDate", void 0);
+__decorate([
+    (0, class_transformer_1.Expose)(),
+    (0, class_transformer_1.Transform)(({ obj }) => obj.profile?.weight || null),
+    __metadata("design:type", Object)
+], RetrieveUserDto.prototype, "weight", void 0);
+__decorate([
+    (0, class_transformer_1.Expose)(),
+    (0, class_transformer_1.Transform)(({ obj }) => obj.profile?.height || null),
+    __metadata("design:type", Object)
+], RetrieveUserDto.prototype, "height", void 0);
+__decorate([
+    (0, class_transformer_1.Expose)(),
+    (0, class_transformer_1.Transform)(({ obj }) => obj.profile?.chronicDiseases || []),
+    __metadata("design:type", Array)
+], RetrieveUserDto.prototype, "chronicDiseases", void 0);
+__decorate([
+    (0, class_transformer_1.Expose)(),
+    (0, class_transformer_1.Transform)(({ obj }) => obj.profile?.emergencyContacts || []),
+    __metadata("design:type", Array)
+], RetrieveUserDto.prototype, "emergencyContacts", void 0);
 //# sourceMappingURL=retrieve-user.dto.js.map
