@@ -11,6 +11,8 @@ import {
   ParseIntPipe,
   UseGuards,
   Req,
+  ParseUUIDPipe,
+  Query,
 } from '@nestjs/common';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { ReportService } from './report.service';
@@ -24,6 +26,10 @@ import {
 } from '../auth/guards/emu-auth.guard';
 import { AuthenticatedRequest } from '../shared/types/auth.types';
 import { plainToInstance } from 'class-transformer';
+import { UUID } from 'crypto';
+import { ReportStatus } from 'src/shared/enums/report.enums';
+import { EmergencyUnitStatsDto } from './dto/emergency-unit-stats.dto';
+import { StatisticsResponseDto } from './dto/statistics-response.dto';
 
 @Controller('reports')
 export class ReportController {
@@ -86,14 +92,44 @@ export class ReportController {
   @UseGuards(EMUAuthGuard)
   async findMyEmergencyUnitReports(
     @Req() req: EMUAuthenticatedRequest,
-  ): Promise<RetrieveReportDto[]> {
-    const reports = await this.reportService.findByEmergencyUnit(req.emu.id);
-    console.log(
-      plainToInstance(RetrieveReportDto, reports, {
+    @Query('status') status: string = ReportStatus.ACTIVE,
+  ): Promise<{
+    reports: RetrieveReportDto[];
+    stats: EmergencyUnitStatsDto;
+  }> {
+    if (!Object.values(ReportStatus).includes(status as ReportStatus)) {
+      throw new Error('Invalid report status');
+    }
+
+    const emergencyUnitId = req.emu.id;
+
+    // Get reports
+    const reports = await this.reportService.findByEmergencyUnit(
+      emergencyUnitId,
+      status as ReportStatus,
+    );
+    // Get statistics
+    const stats =
+      await this.reportService.getEmergencyUnitStats(emergencyUnitId);
+
+    // Format the response
+    return {
+      reports: plainToInstance(RetrieveReportDto, reports, {
         excludeExtraneousValues: true,
       }),
-    );
-    return plainToInstance(RetrieveReportDto, reports, {
+      stats: plainToInstance(EmergencyUnitStatsDto, stats, {
+        excludeExtraneousValues: true,
+      }),
+    };
+  }
+
+  @Get('emergency-unit/:id')
+  @UseGuards(EMUAuthGuard)
+  async findEmergencyUnitReportById(
+    @Param('id', ParseUUIDPipe) id: UUID,
+  ): Promise<RetrieveReportDto> {
+    const report = await this.reportService.findByUuid(id);
+    return plainToInstance(RetrieveReportDto, report, {
       excludeExtraneousValues: true,
     });
   }
@@ -101,9 +137,9 @@ export class ReportController {
   @Get('user/:id')
   @UseGuards(JwtAuthGuard)
   async findOne(
-    @Param('id', ParseIntPipe) id: number,
+    @Param('id', ParseUUIDPipe) id: UUID,
   ): Promise<RetrieveReportDto> {
-    const report = await this.reportService.findOne(id);
+    const report = await this.reportService.findByUuid(id);
     return plainToInstance(RetrieveReportDto, report, {
       excludeExtraneousValues: true,
     });
@@ -124,9 +160,38 @@ export class ReportController {
   @Delete('user/:id')
   @UseGuards(JwtAuthGuard)
   async remove(
-    @Param('id', ParseIntPipe) id: number,
+    @Param('id', ParseUUIDPipe) id: UUID,
   ): Promise<{ message: string }> {
     await this.reportService.remove(id);
     return { message: 'Report deleted successfully' };
+  }
+
+  @Patch(':id/accept')
+  @UseGuards(EMUAuthGuard)
+  async acceptReport(
+    @Param('id', ParseUUIDPipe) id: UUID,
+  ): Promise<RetrieveReportDto> {
+    const acceptedReport = await this.reportService.acceptReport(id);
+    return plainToInstance(RetrieveReportDto, acceptedReport, {
+      excludeExtraneousValues: true,
+    });
+  }
+
+  @Get('statistics')
+  @UseGuards(EMUAuthGuard)
+  async getStatistics(
+    @Req() req: EMUAuthenticatedRequest,
+  ): Promise<StatisticsResponseDto> {
+    const emergencyUnitId = req.emu.id;
+
+    // Get reports by day of week
+    const weeklyStats =
+      await this.reportService.getWeeklyReportStats(emergencyUnitId);
+
+    return plainToInstance(
+      StatisticsResponseDto,
+      { weeklyStats },
+      { excludeExtraneousValues: true },
+    );
   }
 }

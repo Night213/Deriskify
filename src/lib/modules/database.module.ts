@@ -8,11 +8,15 @@ import { dataSourceOptions } from '../configs/db/data-source';
     ConfigModule.forRoot({ isGlobal: true }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
-      useFactory: (configService: ConfigService) => ({
-        ...dataSourceOptions,
-        autoLoadEntities: true,
-        synchronize: configService.get<boolean>('DB_SYNC', false),
-      }),
+      useFactory: (configService: ConfigService) => {
+        const synchronize: boolean =
+          configService.get<string>('DB_SYNC', 'false') === 'true';
+        return {
+          ...dataSourceOptions,
+          autoLoadEntities: true,
+          synchronize,
+        };
+      },
       inject: [ConfigService],
     }),
   ],
