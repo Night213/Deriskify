@@ -12,11 +12,16 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.EmergencyUnitListDto = void 0;
 const class_transformer_1 = require("class-transformer");
 class EmergencyUnitListDto {
+    numericId;
     id;
     name;
     icon;
 }
 exports.EmergencyUnitListDto = EmergencyUnitListDto;
+__decorate([
+    (0, class_transformer_1.Expose)(),
+    __metadata("design:type", Number)
+], EmergencyUnitListDto.prototype, "numericId", void 0);
 __decorate([
     (0, class_transformer_1.Expose)(),
     (0, class_transformer_1.Transform)(({ obj }) => obj._id),

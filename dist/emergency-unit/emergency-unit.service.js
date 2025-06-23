@@ -34,10 +34,11 @@ let EmergencyUnitService = class EmergencyUnitService {
         throw new common_1.NotImplementedException('EmergencyUnitService: create is not implemented yet');
     }
     async findAll() {
-        return await this.emergencyUnitRepository.find({
-            select: ['_id', 'name', 'icon'],
+        const units = await this.emergencyUnitRepository.find({
+            select: ['id', '_id', 'name', 'icon'],
             where: { isActive: true },
         });
+        return units.map(unit => ({ ...unit, numericId: unit.id }));
     }
     async findOne(id) {
         const emergencyUnit = await this.emergencyUnitRepository.findOneBy({ id });

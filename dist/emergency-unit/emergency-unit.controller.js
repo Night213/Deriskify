@@ -28,6 +28,7 @@ let EmergencyUnitController = class EmergencyUnitController {
         const emergencyUnits = await this.emergencyUnitService.findAll();
         return (0, class_transformer_1.plainToInstance)(emergency_unit_list_dto_1.EmergencyUnitListDto, emergencyUnits, {
             excludeExtraneousValues: true,
+            exposeDefaultValues: true,
         });
     }
     create(createEmergencyUnitDto) {

@@ -22,6 +22,7 @@ export class EmergencyUnitController {
     const emergencyUnits = await this.emergencyUnitService.findAll();
     return plainToInstance(EmergencyUnitListDto, emergencyUnits, {
       excludeExtraneousValues: true,
+      exposeDefaultValues: true,
     });
   }
 

@@ -32,10 +32,12 @@ export class EmergencyUnitService {
   }
 
   async findAll() {
-    return await this.emergencyUnitRepository.find({
-      select: ['_id', 'name', 'icon'],
+    const units = await this.emergencyUnitRepository.find({
+      select: ['id', '_id', 'name', 'icon'],
       where: { isActive: true },
     });
+    // Attach numericId for DTO
+    return units.map(unit => ({ ...unit, numericId: unit.id }));
   }
 
   async findOne(id: number) {

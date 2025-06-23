@@ -7,7 +7,23 @@ export declare class EmergencyUnitService {
     constructor(emergencyUnitRepository: Repository<EmergencyUnit>);
     private readonly argon2Options;
     create(createEmergencyUnitDto: CreateEmergencyUnitDto): void;
-    findAll(): Promise<EmergencyUnit[]>;
+    findAll(): Promise<{
+        numericId: number;
+        id: number;
+        _id: import("crypto").UUID;
+        username: string;
+        name: string;
+        phone: string;
+        password: string;
+        email: string;
+        website: string;
+        description: string;
+        icon: string;
+        stations: import("../shared/types/user.types").EmergencyUnitStation[];
+        isActive: boolean;
+        createdAt: Date;
+        updatedAt: Date;
+    }[]>;
     findOne(id: number): Promise<EmergencyUnit>;
     findByUsername(username: string): Promise<EmergencyUnit>;
     hashPassword(password: string): Promise<string>;
