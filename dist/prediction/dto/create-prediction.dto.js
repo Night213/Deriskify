@@ -12,9 +12,15 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.CreatePredictionDto = void 0;
 const class_validator_1 = require("class-validator");
 class CreatePredictionDto {
+    categoryId;
     category;
 }
 exports.CreatePredictionDto = CreatePredictionDto;
+__decorate([
+    (0, class_validator_1.IsNotEmpty)(),
+    (0, class_validator_1.IsUUID)(),
+    __metadata("design:type", String)
+], CreatePredictionDto.prototype, "categoryId", void 0);
 __decorate([
     (0, class_validator_1.IsNotEmpty)(),
     (0, class_validator_1.IsString)(),

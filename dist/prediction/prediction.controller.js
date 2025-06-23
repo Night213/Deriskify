@@ -27,16 +27,51 @@ let PredictionController = class PredictionController {
         if (!file) {
             throw new common_1.BadRequestException('Image file is required');
         }
-        if (!body.category) {
-            throw new common_1.BadRequestException('Category is required');
+        if (!body.category || !body.categoryId) {
+            throw new common_1.BadRequestException('Category and categoryId are required');
         }
-        return this.predictionService.predictAndSave(file, body.category, req.user);
+        const prediction = await this.predictionService.predictAndSave(file, body.category, body.categoryId, req.user);
+        return {
+            predictedPriority: prediction.predictedPriority,
+            imageUrl: prediction.imageUrl,
+        };
     }
     async getMyPredictions(req) {
-        return this.predictionService.findByUser(req.user.id);
+        const predictions = await this.predictionService.findByUser(req.user.id);
+        return predictions.map(prediction => ({
+            id: prediction.id,
+            category: prediction.category,
+            predictedPriority: prediction.predictedPriority,
+            imageName: prediction.imageName,
+            imageUrl: prediction.imageUrl,
+            createdAt: prediction.createdAt,
+            user: prediction.user,
+        }));
     }
-    async getAllPredictions() {
-        return this.predictionService.findAll();
+    async getAllPredictions(req) {
+        if (req.user && req.user.userType === 'EMERGENCY_UNIT') {
+            const emu = await this.predictionService.getEmergencyUnitService().findOne(req.user.id);
+            const predictions = await this.predictionService.findByEmergencyUnitCategory(emu._id);
+            return predictions.map(prediction => ({
+                id: prediction.id,
+                category: prediction.category,
+                predictedPriority: prediction.predictedPriority,
+                imageName: prediction.imageName,
+                imageUrl: prediction.imageUrl,
+                createdAt: prediction.createdAt,
+                user: prediction.user,
+            }));
+        }
+        const predictions = await this.predictionService.findAll();
+        return predictions.map(prediction => ({
+            id: prediction.id,
+            category: prediction.category,
+            predictedPriority: prediction.predictedPriority,
+            imageName: prediction.imageName,
+            imageUrl: prediction.imageUrl,
+            createdAt: prediction.createdAt,
+            user: prediction.user,
+        }));
     }
 };
 exports.PredictionController = PredictionController;
@@ -61,8 +96,10 @@ __decorate([
 ], PredictionController.prototype, "getMyPredictions", null);
 __decorate([
     (0, common_1.Get)(),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    __param(0, (0, common_1.Req)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
+    __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], PredictionController.prototype, "getAllPredictions", null);
 exports.PredictionController = PredictionController = __decorate([

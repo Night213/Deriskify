@@ -10,6 +10,9 @@ export class PredictionEntity {
   @Column({ type: 'varchar', length: 50 })
   category: string;
 
+  @Column({ type: 'uuid', nullable: true })
+  categoryId: string | null; // EmergencyUnit UUID, now nullable
+
   @Column({ type: 'int' })
   predictedPriority: number;
 

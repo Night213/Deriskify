@@ -14,6 +14,7 @@ const prediction_controller_1 = require("./prediction.controller");
 const prediction_entity_1 = require("./entities/prediction.entity");
 const auth_module_1 = require("../auth/auth.module");
 const user_module_1 = require("../user/user.module");
+const emergency_unit_module_1 = require("../emergency-unit/emergency-unit.module");
 let PredictionModule = class PredictionModule {
 };
 exports.PredictionModule = PredictionModule;
@@ -23,6 +24,7 @@ exports.PredictionModule = PredictionModule = __decorate([
             typeorm_1.TypeOrmModule.forFeature([prediction_entity_1.PredictionEntity]),
             auth_module_1.AuthModule,
             user_module_1.UserModule,
+            emergency_unit_module_1.EmergencyUnitModule,
         ],
         controllers: [prediction_controller_1.PredictionController],
         providers: [prediction_service_1.PredictionService],

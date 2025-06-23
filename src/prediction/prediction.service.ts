@@ -8,6 +8,7 @@ import { ConfigService } from '@nestjs/config';
 import { EmergencyUnitService } from '../emergency-unit/emergency-unit.service';
 import { UserType } from '../shared/enums/user.enums';
 import { EmergencyUnit } from '../emergency-unit/entities/emergency-unit.entity';
+import { UUID } from 'crypto';
 
 @Injectable()
 export class PredictionService {
@@ -25,6 +26,7 @@ export class PredictionService {
   async predictAndSave(
     file: Express.Multer.File,
     category: string,
+    categoryId: string,
     user: any,
   ): Promise<PredictionEntity> {
     try {
@@ -57,6 +59,7 @@ export class PredictionService {
       }
       const prediction = this.predictionRepository.create({
         category,
+        categoryId,
         predictedPriority,
         imageName: file.originalname,
         imageUrl: fullImageUrl,
@@ -84,5 +87,13 @@ export class PredictionService {
 
   async findByEmergencyUnit(emergencyUnitId: number): Promise<PredictionEntity[]> {
     return this.predictionRepository.find({ where: { emergencyUnit: { id: emergencyUnitId } }, relations: ['emergencyUnit', 'user'] });
+  }
+
+  async findByEmergencyUnitCategory(categoryId: string): Promise<PredictionEntity[]> {
+    return this.predictionRepository.find({ where: { categoryId }, relations: ['user'] });
+  }
+
+  public getEmergencyUnitService() {
+    return this.emergencyUnitService;
   }
 }
